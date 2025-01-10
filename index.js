@@ -7,7 +7,6 @@ const http = require('http');
 
 const PORT = 5000;
 const jwt = require('jsonwebtoken');
-
 const SECRET_KEY = 'tu_clave_secreta_super_segura'; // Cambia esta clave por algo único y seguro
 const VALID_USER = {
   username: 'admin',
