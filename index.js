@@ -36,6 +36,7 @@ io.on('connection', (socket) => {
 
 const authenticateJWT = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
+  console.log("intentando autentificar");
 
   if (!token) {
     return res.status(403).json({ message: 'Token no proporcionado' });
@@ -53,7 +54,8 @@ const authenticateJWT = (req, res, next) => {
 // Ruta de login
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-
+  console.log("intentando logear");
+  
   if (username === VALID_USER.username && password === VALID_USER.password) {
     const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' });
     return res.json({ token });
