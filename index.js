@@ -133,15 +133,9 @@ app.delete('/api/products/:id', authenticateJWT, (req, res) => {
 });
 
 // Servir frontend
-app.use(express.static(path.join(__dirname, 'build')));
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api')) {
-    return next();
-  }
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
 
-// Iniciar el servidor
+
+// Iniciar el servidor 
 server.listen(PORT, () => {
   console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
 });
