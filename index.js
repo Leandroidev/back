@@ -134,9 +134,66 @@ app.delete('/api/products/:id', authenticateJWT, (req, res) => {
   });
 });
 
-// Servir frontend
+app.post('/api/products/disable-all', authenticateJWT, (req, res) => {
+  console.log("Cambiando la propiedad 'disponible' de todos los productos a false...");
+  
+  fs.readFile(path.join(__dirname, 'public', 'data.json'), 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error al leer el archivo' });
+    }
 
+    let products = JSON.parse(data);
 
+    // Cambiar la propiedad "disponible" de todos los productos a false
+    products = products.map(product => ({
+      ...product,
+      disponible: false
+    }));
+
+    // Escribir los cambios en el archivo
+    fs.writeFile(path.join(__dirname, 'public', 'data.json'), JSON.stringify(products, null, 2), (writeErr) => {
+      if (writeErr) {
+        return res.status(500).json({ error: 'Error al escribir en el archivo' });
+      }
+
+      // Emitir evento a través de Socket.IO para notificar el cambio
+      io.emit('productosDeshabilitados');
+
+      // Responder con éxito
+      res.json({ message: 'Todos los productos han sido deshabilitados' });
+    });
+  });
+});
+app.post('/api/products/enable-all', authenticateJWT, (req, res) => {
+  console.log("Cambiando la propiedad 'disponible' de todos los productos a true...");
+  
+  fs.readFile(path.join(__dirname, 'public', 'data.json'), 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error al leer el archivo' });
+    }
+
+    let products = JSON.parse(data);
+
+    // Cambiar la propiedad "disponible" de todos los productos a true
+    products = products.map(product => ({
+      ...product,
+      disponible: true
+    }));
+
+    // Escribir los cambios en el archivo
+    fs.writeFile(path.join(__dirname, 'public', 'data.json'), JSON.stringify(products, null, 2), (writeErr) => {
+      if (writeErr) {
+        return res.status(500).json({ error: 'Error al escribir en el archivo' });
+      }
+
+      // Emitir evento a través de Socket.IO para notificar el cambio
+      io.emit('productosHabilitados');
+
+      // Responder con éxito
+      res.json({ message: 'Todos los productos han sido habilitados' });
+    });
+  });
+});
 // Iniciar el servidor 
 server.listen(PORT, () => {
   console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
