@@ -74,7 +74,50 @@ app.get('/api/products', (req, res) => {
     res.json(JSON.parse(data));
   });
 });
+//ruta para agregar un producto
+app.post('/api/products', authenticateJWT, (req, res) => {
+  const { editedProduct } = req.body;
 
+  if (!editedProduct || Object.keys(editedProduct).length === 0) {
+    return res.status(400).json({ error: 'Datos del producto no proporcionados' });
+  }
+
+  fs.readFile(path.join(__dirname, 'public', 'data.json'), 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error al leer el archivo' });
+    }
+
+    let products = JSON.parse(data);
+
+    // Encontrar el primer ID libre
+    let nextId = 0;
+    while (products.some(product => product.id === nextId)) {
+      nextId++;
+    }
+
+    // Crear el nuevo producto con el ID asignado
+    const newProduct = {
+      id: nextId,
+      ...editedProduct,
+    };
+
+    // Agregar el nuevo producto a la lista
+    products.push(newProduct);
+
+    // Escribir los cambios en el archivo
+    fs.writeFile(path.join(__dirname, 'public', 'data.json'), JSON.stringify(products, null, 2), (writeErr) => {
+      if (writeErr) {
+        return res.status(500).json({ error: 'Error al escribir en el archivo' });
+      }
+
+      // Emitir evento a través de Socket.IO para notificar el cambio
+      io.emit('productoCreado', newProduct);
+
+      // Responder con éxito y devolver el producto creado
+      res.status(201).json(newProduct);
+    });
+  });
+});
 // Ruta para actualizar un producto
 app.put('/api/products/:id', authenticateJWT, (req, res) => {
   const productId = parseInt(req.params.id, 10);
