@@ -149,7 +149,8 @@ app.post('/api/products/disable-all', authenticateJWT, (req, res) => {
       ...product,
       disponible: false
     }));
-
+    console.log(products);
+    
     // Escribir los cambios en el archivo
     fs.writeFile(path.join(__dirname, 'public', 'data.json'), JSON.stringify(products, null, 2), (writeErr) => {
       if (writeErr) {
